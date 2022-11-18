@@ -1,0 +1,1 @@
+beginPage = *(beginMap) + pageSize / 2;
