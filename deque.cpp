@@ -11,11 +11,16 @@ class Deque
     size_t mapSize = 7;
     size_t size = 0;
 
-    int** calculatePosition(size_t i, int& offset)
+    T** calculatePosition(int i, int& offset)
     {
-        size_t position = beginPage - *(beginMap) + i;
-        offset = position % pageSize;
-        return beginMap + position / pageSize;
+        int position = beginPage - *(beginMap) + i;
+        offset = position % (int)pageSize;
+        if (offset < 0)
+        {
+            offset += 5;
+            return beginMap + (position / (int)pageSize - 1);
+        }
+        return beginMap + position / (int)pageSize;
     }
 public:
 
@@ -31,28 +36,43 @@ public:
     void push_back(T v)
     {
         int offset;
-        int*& position = *(calculatePosition(size, offset));
-        if (!position)
-            position = new T[pageSize];
-        position[offset] = v;
+        T*& page = *(calculatePosition(size, offset));
+        if (!page)
+            page = new T[pageSize];
+        page[offset] = v;
         size++;
     }
     void push_front(T v)
     {
-        
+        int offset;
+        T** tMap = calculatePosition(-1, offset);
+        T*& page = *(tMap);
+        if (!page)
+        {
+            page = new T[pageSize];
+            beginMap = tMap;
+        }
+        beginPage = page + offset;
+        page[offset] = v;
+        size++;
     }
     void pop_back()
     {
-        
+        size--;
     }
     void pop_front()
     {
-
+        int offset;
+        T*& page = *(calculatePosition(0, offset));
+        if (offset == 4)
+            beginMap = map + 1;
+        beginPage = *(beginMap) + (offset + 1) % 5;
+        size--;
     }
-    T& operator[] (size_t i)
+    T& operator[] (int i)
     {
         int offset;
-        int*& position = *(calculatePosition(i, offset));
+        T*& position = *(calculatePosition(i, offset));
         return position[offset];
     }
     void print()
@@ -73,7 +93,15 @@ int main()
     myList.push_back(6);
     myList.push_back(6);
     myList.push_back(6);
+    myList.push_back(10);
+    myList.push_front(2);
+    myList.push_front(2);
+    myList.push_front(2);
+    myList.push_front(-1);
+    myList.pop_back();
+    myList.pop_front();
     myList.print();
+    std::cout << myList[2];
 
     return 0;
 }

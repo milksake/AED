@@ -3,6 +3,8 @@
 #include <queue>
 #include <functional>
 
+#include <utility>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct CBinNode
@@ -106,6 +108,44 @@ void CBinTree::InOrder(void (*f)(CBinNode*))
 
 void CBinTree::InOrder(void (*f)(CBinNode*), CBinNode* x)
 {
+    std::stack<std::pair<CBinNode*, int>> s;
+    //first -> node
+    //second -> state
+
+    s.push({x, 0});
+    
+    while (!s.empty())
+    {
+        switch (s.top().second)
+        {
+        case 0:
+            s.top().second = 1;
+            if (s.top().first->nodes[0])
+                s.push({s.top().first->nodes[0], 0});
+            break;
+            
+        case 1:
+            s.top().second = 2;
+            f(s.top().first);
+            break;
+            
+        case 2:
+            s.top().second = 3;
+            if (s.top().first->nodes[1])
+                s.push({s.top().first->nodes[1], 0});
+            break;
+            
+        case 3:
+            s.pop();
+            break;
+        
+        default:
+            break;
+        }
+    }
+
+
+    /*
     struct nodeNstate
     {
         CBinNode* node;
@@ -140,6 +180,7 @@ void CBinTree::InOrder(void (*f)(CBinNode*), CBinNode* x)
             break;
         }
     }
+    */
 }
 
 void CBinTree::PreOrder(std::function<void(CBinNode*)> f)

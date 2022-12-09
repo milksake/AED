@@ -28,7 +28,6 @@ public:
     void Hojas();
     void Hijos();
     void Hermanos();
-    void Lobster();
 private:
     bool Find(int x, CBinNode**& p);
     CBinNode** Rep(CBinNode** p);
@@ -37,7 +36,6 @@ private:
     void InOrderHojas(CBinNode* x);
     void InOrderHijos(CBinNode* x);
     void InOrderHermanos(CBinNode* x);
-    void InOrderLobster(CBinNode* x);
     CBinNode* root;
     bool brep;
 };
@@ -175,18 +173,6 @@ void CBinTree::Hermanos()
     std::cout << '\n';
 }
 
-void CBinTree::Lobster()
-{
-    //std::stack<CBinNode*> l;
-    //for (auto p = root; p; p->nodes[0])
-    //{
-    //    std::cout << p->value << ' ';
-    //    l.push(p);
-    //}
-    //l.pop();
-    //for (auto q = l.top(); q->value; q);
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main()
@@ -200,6 +186,5 @@ int main()
     t.Hojas();
     t.Hijos();
     t.Hermanos();
-    t.Lobster();
 }
 
