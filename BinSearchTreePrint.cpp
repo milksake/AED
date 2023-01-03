@@ -37,15 +37,15 @@ public:
     void InnerNodes();
 private:
     bool Find(int x, CBinNode**& p, std::stack<CBinNode*>& s);
-    CBinNode** Rep(CBinNode** p);
+    CBinNode** Rep(CBinNode** p, std::stack<CBinNode*>& s);
     void InOrder(void (*f)(CBinNode*));
     void InOrder(void (*f)(CBinNode*), CBinNode* x);
     void PreOrder(std::function<void(CBinNode*)> f);
     void PreOrder(std::function<void(CBinNode*)> f, CBinNode* x);
     void PreOrderReverse(std::function<void(CBinNode*)> f);
     void PreOrderReverse(std::function<void(CBinNode*)> f, CBinNode* x);
-    void ByLevel(void (*f)(CBinNode*));
-    void ByLevel(void (*f)(CBinNode*), CBinNode* x);
+    void ByLevel(void (*f)(CBinNode*, int));
+    void ByLevel(void (*f)(CBinNode*, int), CBinNode* x);
     CBinNode* root;
     bool brep;
 };
@@ -93,21 +93,29 @@ bool CBinTree::Remove(int x)
  
     if ( (*p)->nodes[0] && (*p)->nodes[1] ) //case 2
     {
-        CBinNode** q = Rep(p);
+        CBinNode** q = Rep(p, s);
         (*p)->value = (*q)->value;
         p = q;
     }
     // case 0 or case 1
     CBinNode* t = *p;
     *p = (*p)->nodes[ (*p)->nodes[1] != 0 ];
+    
+    while (!s.empty())
+    {
+        s.top()->width -= t->width;
+        s.pop();
+    }
+
     delete t;
     return 1;
 }
 
-CBinNode** CBinTree::Rep(CBinNode** p)
+CBinNode** CBinTree::Rep(CBinNode** p, std::stack<CBinNode*>& s)
 {
     CBinNode** q = p;
-    for ( q = &((*q)->nodes[!brep]); *q; q = &((*q)->nodes[brep]) );
+    for ( q = &((*q)->nodes[!brep]); (*q)->nodes[brep]; q = &((*q)->nodes[brep]) )
+        s.push(*q);
     brep = !brep;
     return q;
 }
@@ -241,22 +249,22 @@ void CBinTree::PreOrderReverse(std::function<void(CBinNode*)> f, CBinNode* x)
     }
 }
 
-void CBinTree::ByLevel(void (*f)(CBinNode*))
+void CBinTree::ByLevel(void (*f)(CBinNode*, int))
 {
     ByLevel(f, root);
 }
 
-void CBinTree::ByLevel(void (*f)(CBinNode*), CBinNode* x)
+void CBinTree::ByLevel(void (*f)(CBinNode*, int), CBinNode* x)
 {
-    std::queue<CBinNode*> q;
-    q.push(x);
+    std::queue<std::pair<CBinNode*, int>> q;
+    q.push({x, 0});
     for (; !q.empty();)
     {
-        f(q.front());
-        if (q.front()->nodes[0])
-            q.push(q.front()->nodes[0]);
-        if (q.front()->nodes[1])
-            q.push(q.front()->nodes[1]);
+        f(q.front().first, q.front().second);
+        if (q.front().first->nodes[0])
+            q.push({q.front().first->nodes[0], q.front().second + 1});
+        if (q.front().first->nodes[1])
+            q.push({q.front().first->nodes[1], q.front().second + 1});
         q.pop();
     }
 }
@@ -323,7 +331,7 @@ void CBinTree::Print()
 
 void CBinTree::PrintByLevel()
 {
-    ByLevel([](CBinNode* n){ std::cout << n->value << ' '; });
+    ByLevel([](CBinNode* n, int l){ std::cout << '(' << n->value << ", " << l << ") "; });
 }
 
 void CBinTree::Ramas()
@@ -439,7 +447,7 @@ int main()
     CBinTree t; CBinTree t2;
     
     t.Insert(8);
-    t.Insert(4);
+    t.Insert(4); t.Remove(4);
     t.Insert(11);
     t.Insert(2); t.Insert(6); t.Insert(9); t.Insert(13); t.Insert(1); t.Insert(3); t.Insert(5); t.Insert(7); t.Insert(10); t.Insert(12);
     t2.Insert(28); t2.Insert(4); t2.Insert(69); t2.Insert(8); t2.Insert(56); t2.Insert(7); t2.Insert(12); t2.Insert(34); t2.Insert(67); t2.Insert(5); t2.Insert(23); t2.Insert(32); t2.Insert(63); t2.Insert(68); t2.Insert(6); t2.Insert(21); t2.Insert(30); t2.Insert(59);
@@ -449,7 +457,7 @@ int main()
     //t.Hojas(); std::cout << '\n';
     //t.Hijos(); std::cout << '\n';
     //t.Hermanos(); std::cout << '\n';
-    //t.PrintByLevel(); std::cout << '\n';
+    t.PrintByLevel(); std::cout << '\n';
     //t.OutlineNodes(); std::cout << '\n';
     //t.InnerNodes(); std::cout << "\n\n";
 
