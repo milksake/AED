@@ -10,7 +10,8 @@
 struct CBinNode
 {
     CBinNode(int _v)
-    { value = _v;
+    {
+        value = _v;
         nodes[0] = nodes[1] = 0;
     }
     int value;
